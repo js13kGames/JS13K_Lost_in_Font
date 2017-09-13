@@ -1,0 +1,486 @@
+<!DOCTYPE html> <html lang="en"><head><meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+<style type="text/css">
+    html {
+    text-align: center;
+    top: 100%;
+    left: 0;
+  }
+body { margin: 0; padding: 0; background: #000
+</style></head><body>
+    
+<canvas id="myCanvas" width="400" height="400" >
+</canvas>
+    
+<font size="3" color="black"> <font id = 'w1' size="3" color="red"></font><font id = 'w2' size="3" color="red"></font></font>
+    
+    
+<script>
+var VN = ['red','orange','yellow','green','blue','purple','pink'];
+var VC = ['red',
+          'darkorange',
+          'yellow',
+          'lime',
+          'aqua',
+          'darkviolet',
+          'hotpink'];
+
+
+
+
+
+//might be faster to declare variables in functions
+var canvas = document.getElementById('myCanvas');
+var ctx = canvas.getContext('2d');
+//var ctx = document.getElementById('myCanvas').getContext('2d');
+//var context = ctx.getContext('2d');
+    
+var canvasHeight = '375'
+var canvasWidth = '667'
+var posx = [canvasWidth/4, canvasWidth/2, 3 * canvasWidth/4, canvasWidth/4, canvasWidth/2,3 * canvasWidth/4];
+var posy = [115, 115, 115, 185, 185, 185];
+
+var CN = [''];
+var CC = [''];
+
+var CommonNames = [''];
+var CommonColours = [''];
+
+var answerText = '';
+var answerColor = '';
+var answerTextNum = 0;
+var answerColorNum = 0;
+var optionsList = [''];
+var score = 0;
+var highscore = 0;
+var count = 1;
+var word1 = '';
+var word2 = '';
+var gameState = 'main';
+var counting = false;
+
+//run the functions
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+Start()
+
+mainScreen();
+var myVar = setInterval(timer, 1000);    
+drawborders()
+function nextLevel(){
+    
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  gameState = 'playing';
+    
+  drawborders();
+  if(score >= 1 ){
+      count = 30;
+      if(score > 10 ){
+          count = 20;
+      }
+      if(score > 20 ){
+          count = 10;
+      }
+      counting = true;
+      if(counting = true){
+      //timer();
+        
+      }
+      
+  }
+    
+  getAnswer();
+  //drawAnswer();
+  
+  buildQuestion();
+
+  buildOptions();
+
+  getNames();
+}
+
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+function timer() {
+    count--;
+    //var d = new Date();
+    if(counting == true){
+        ctx.font = '30px consolas';
+        ctx.fillStyle = 'red';
+        ctx.clearRect(4*canvasWidth/5+70, 0,50,50);
+        ctx.fillText(count, 4*canvasWidth/5+70+0, 30);
+        if(count == 0){
+            gameOver();
+        }
+    }
+    
+    
+}
+
+function Start(){
+  var ctx = document.getElementById('myCanvas').getContext('2d');
+  document.getElementById("myCanvas").style.background = 'black';
+  document.getElementById("myCanvas").height = canvasHeight;
+  document.getElementById("myCanvas").width = canvasWidth;
+  
+}
+
+function mainScreen() {
+  //var s = document.getElementById('myCanvas').getContext('2d');
+  ctx.font = '40px consolas';
+  ctx.fillStyle = 'white';
+  ctx.fillText('Lost in', canvasWidth/2 - 130, 2*canvasHeight/5);
+  ctx.beginPath()
+  ctx.fillStyle = 'red';
+  ctx.fillText('F', 400-20, 2*canvasHeight/5);
+  ctx.beginPath()
+  ctx.fillStyle = 'yellow';
+  ctx.fillText('o', 420-20, 2*canvasHeight/5);
+  ctx.beginPath()
+  ctx.fillStyle = 'lime';
+  ctx.fillText('n', 440-20, 2*canvasHeight/5);
+  ctx.beginPath()
+  ctx.fillStyle = 'aqua';
+  ctx.fillText('t', 460-20, 2*canvasHeight/5);
+  
+  ctx.font = '15px consolas';
+  ctx.beginPath()
+  ctx.fillStyle = 'white';
+  ctx.fillText('If on mobile, rotate device', canvasWidth/2 - 115, 3*canvasHeight/5+30);
+  ctx.font = '15px consolas';
+  ctx.beginPath()
+  ctx.fillStyle = 'gray';
+  ctx.fillText('click here to continue...', canvasWidth/2 - 110, 4*canvasHeight/5+20);
+  var elem = document.getElementById('myCanvas'); 
+  elem.addEventListener('click', function(event) {
+    if(gameState == 'main'){
+        nextLevel();
+        drawScore();
+        gameState = 'playing';
+    }
+    else if(gameState == 'gameover'){
+        score = 0;
+        nextLevel();
+        drawScore();
+        gameState = 'playing';
+    }
+  }, false);
+}
+    
+function gameOver() {
+  gameState = 'gameover';
+  counting = false;
+  //clearInterval(myVar);
+  if(highscore < score){
+      highscore = score;
+  }
+    
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawborders();
+  ctx.font = '40px consolas';
+  ctx.fillStyle = 'white';
+  ctx.fillText('Game Over', canvasWidth/2 - 100, 2*canvasHeight/5);
+  ctx.font = '20px consolas';
+  ctx.beginPath()
+  ctx.fillStyle = 'white';
+  ctx.fillText('Highscore: '+ highscore, canvasWidth/2 - 70, 3*canvasHeight/5+30);
+  ctx.font = '15px consolas';
+  ctx.beginPath()
+  ctx.fillStyle = 'white';
+  ctx.fillText('click here to try again!', canvasWidth/2 - 100, 4*canvasHeight/5+20);
+  
+}
+
+var elem = document.getElementById('myCanvas'); 
+elem.addEventListener('click', function(event) {
+    //points for click boundaries
+var p1x =2*canvasWidth/16;
+var p2x =2*canvasWidth/16 + (3*canvasWidth/4)/3;
+var p3x =2*canvasWidth/16 + 2*(3*canvasWidth/4)/3;
+var p4x =2*canvasWidth/16 + 3*canvasWidth/4;
+
+
+var p1y =canvasHeight/5;
+var p2y =canvasHeight/5 + 70;
+var p3y =canvasHeight/5 + 140;
+    
+var elemLeft = elem.offsetLeft;
+    
+var x = event.pageX - elemLeft,
+    y = event.pageY;
+if(gameState == 'main'){
+        nextLevel();
+        drawScore();
+        gameState = 'playing';
+    }
+    else if(gameState == 'gameover'){
+        myVar = setInterval(timer, 1000); 
+        nextLevel();
+        score = 0;
+        drawScore();
+        
+    }
+    else if(gameState == 'playing'){
+        if(p1x <= x && x <= p2x){
+            if(p1y <= y && y <= p2y){
+            if(CN[0] == answerText && CC[0] == answerColor){
+                score++;
+                nextLevel();
+                drawScore();
+            }
+            else{
+                gameOver();
+            }
+        }
+        else if(p2y <= y && y <= p3y){
+            if(CN[3] == answerText && CC[3] == answerColor){
+                score++;
+                nextLevel();
+                drawScore();
+            }
+            else{
+                gameOver();
+            }
+        }
+    }
+    else if(p2x <= x && x <= p3x){
+        if(p1y <= y && y <= p2y){
+            if(CN[1] == answerText && CC[1] == answerColor){
+                score++;
+                nextLevel();
+                drawScore();
+            }
+            else{
+                gameOver();
+            }
+        }
+        else if(p2y <= y && y <= p3y){
+            if(CN[4] == answerText && CC[4] == answerColor){
+                score++;
+                nextLevel();
+                drawScore();
+            }
+            else{
+                gameOver();
+            }
+        }
+    }
+    else if(p3x <= x && x <= p4x){
+        if(p1y <= y && y <= p2y){
+            if(CN[2] == answerText && CC[2] == answerColor){
+                score++;
+                nextLevel();
+                drawScore();
+            }
+            else{
+                gameOver();
+            }
+        }
+        else if(p2y <= y && y <= p3y){
+            if(CN[5] == answerText && CC[5] == answerColor){
+                score++;
+                nextLevel();
+                drawScore();
+            }
+            else{
+                gameOver();
+            }
+        }
+    }
+    }
+    
+    
+    
+
+}, false);
+
+function drawborders(){
+  //these two rectangles are for the chest in the middle 
+  ctx.beginPath();
+  ctx.lineWidth="3";
+  ctx.strokeStyle="white";
+  ctx.rect(2*canvasWidth/16,canvasHeight/5,3*canvasWidth/4,140); 
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.lineWidth="3";
+  ctx.strokeStyle="white";
+  ctx.rect(2*canvasWidth/16-10,canvasHeight/5-10,3*canvasWidth/4+20,140+20); 
+  ctx.stroke();
+  
+  //these two rectangles are for the question at the bottom 
+  //ctx.beginPath();
+  //ctx.lineWidth="3";
+  //ctx.strokeStyle="white";
+  //ctx.rect(2*canvasWidth/16,4*canvasHeight/5,3*canvasWidth/4,140); 
+  //ctx.stroke();
+  ctx.beginPath();
+  ctx.lineWidth="3";
+  ctx.strokeStyle="white";
+  ctx.rect(2*canvasWidth/16-10,4*canvasHeight/5-20,3*canvasWidth/4+20,80); 
+  ctx.stroke();
+  
+  
+}
+function drawScore () {
+  //var s = document.getElementById('myCanvas').getContext('2d');
+  ctx.font = '30px consolas';
+  ctx.fillStyle = 'white';
+  ctx.fillText(score, 20, 30);
+}
+function getAnswer() {
+  answerTextNum = Math.floor(Math.random() * VC.length);
+  answerText = VN[answerTextNum];
+  //optionsList[0] = answerTextNum;
+  
+  answerColorNum = Math.floor(Math.random() * VN.length);
+  answerColor = VC[answerColorNum];
+  //optionsList[1] = answerColorNum;
+  
+}
+
+//pointless function, for testing purposes:
+function drawAnswer() {
+  var ans = document.getElementById('myCanvas').getContext('2d');
+  ans.font = '20px consolas';
+  ans.fillStyle = answerColor;
+  ans.fillText('The answer is:  '+ answerText, 50, 50);
+  var changed = Math.floor(Math.random() * VC.length);
+  //CN[changed] = answerText;
+  //CC[changed] = answerColor;
+  
+}
+
+function buildOptions() {
+  CommonNames[0] = VN[VC.indexOf(document.getElementById('w1').color)];
+  CommonNames[1] = VN[VC.indexOf(document.getElementById('w2').color)];
+  CommonNames[2] = word1;
+  
+  CommonNames[3] = VN[VC.indexOf(document.getElementById('w1').color)];
+  CommonNames[4] = VN[VC.indexOf(document.getElementById('w2').color)];
+  CommonNames[5] = word2;
+  
+  CommonNames[6] = word2;
+  CommonNames[7] = VN[VC.indexOf(document.getElementById('w2').color)];
+  
+  CommonNames[8] = word1;
+  CommonNames[9] = VN[VC.indexOf(document.getElementById('w1').color)];
+  
+  
+  CommonColours[0] = VC[VN.indexOf(word2)];
+  CommonColours[1] = VC[VN.indexOf(word2)];
+  CommonColours[2] = VC[VN.indexOf(word2)];
+  
+  CommonColours[3] = VC[VN.indexOf(word1)];
+  CommonColours[4] = VC[VN.indexOf(word1)];
+  CommonColours[5] = VC[VN.indexOf(word1)];
+  
+  CommonColours[6] = document.getElementById('w1').color;
+  CommonColours[7] = document.getElementById('w1').color;
+  
+  CommonColours[8] = document.getElementById('w2').color;
+  CommonColours[9] = document.getElementById('w2').color;
+  
+}
+
+
+function buildQuestion() {
+  var current1 = Math.floor(Math.random() * VN.length)
+  word1 = VN[current1];
+  if(current1 == answerTextNum){
+      if(current1 == VN.length - 1){
+        word1 = VN[current1-1];
+      }
+      else{
+        word1 = VN[current1+1];
+      }
+  }
+  //Is there a point to this else statement?
+  else{
+    word1 = VN[current1];
+  }
+  
+  word2 = VN[answerColorNum];
+  //var question = document.getElementById('p1').value = "Find the word " + word1 + " that is coloured ";
+  //var w1text = document.getElementById('w1').textContent = word1;
+  //var w2text = document.getElementById('w2').textContent = word2;
+  
+  document.getElementById('w1').color = VC[answerTextNum];
+  
+  var current2 = Math.floor(Math.random() * VC.length);
+  document.getElementById('w2').color = VC[current2];
+  if(current2 == answerColorNum){
+      if(current2 == VC.length - 1){
+        document.getElementById('w2').color = VC[current2-1];
+      }
+      else{
+        document.getElementById('w2').color = VC[current2+1];
+      }
+    }
+    else{
+      document.getElementById('w2').color = VC[current2];
+    }
+  
+  ctx.font = '15px consolas';
+  ctx.fillStyle = document.getElementById('w1').color;
+  ctx.fillText(word1, 11*canvasWidth/16,4*canvasHeight/5+ 40);
+  ctx.font = '15px consolas';
+  ctx.fillStyle = document.getElementById('w2').color;
+  ctx.fillText(word2, 11*canvasWidth/16,4*canvasHeight/5);
+  
+  drawQuestionText();
+}
+
+
+function drawQuestionText() {
+  //var q = document.getElementById('myCanvas').getContext('2d');
+  ctx.font = '15px consolas';
+  ctx.fillStyle = 'white';
+  ctx.fillText("The answer's colour is equal to the text of: ", 2*canvasWidth/16,4*canvasHeight/5);
+  ctx.fillStyle = 'white';
+  ctx.fillText("The answer's text is equal to the colour of: ", 2*canvasWidth/16,4*canvasHeight/5+ 40); 
+}
+
+function getNames() {
+  //var ttt = document.getElementById('myCanvas').getContext('2d');
+  ctx.font = '20px consolas';
+  var tempNames = [''];
+  var tempColours = [''];
+  tempNames[0] = answerText;
+  tempColours[0] = answerColor;
+  console.log(CommonNames);
+  console.log(CommonColours);
+  CommonNames.splice(CommonNames.indexOf(answerText),1);
+  CommonColours.splice(CommonColours.indexOf(answerColor),1);
+  for(i=1; i<6; i++) {
+    var com2 = Math.floor(Math.random() * CommonNames.length)
+    tempNames[i] = CommonNames[com2];
+    tempColours[i] = CommonColours[com2];
+    CommonNames.splice(com2,1);
+    CommonColours.splice(com2,1);
+    
+    }
+  for(i=0; i<6; i++) {
+    var common = Math.floor(Math.random() * tempNames.length)
+    CN[i] = tempNames[common];
+    CC[i] = tempColours[common];
+    tempNames.splice(common,1);
+    tempColours.splice(common,1);
+    ctx.fillStyle = CC[i];
+    ctx.fillText(CN[i], posx[i] - (10*CN[i].length)/2,posy[i]);
+    
+    }
+  }
+
+
+
+
+
+</script>
